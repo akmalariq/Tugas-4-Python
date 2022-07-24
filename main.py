@@ -1,11 +1,11 @@
 def createDatabase():
-    mydb = mysql.connector.connect(
-        host="localhost", user="root", password=input("Input sql root pass: ")
+    conn = mysql.connector.connect(
+        host="localhost", user="root", password="TxnqyeY4njLuQ5ZB*"
     )
-    mycursor = mydb.cursor()
-
-    mycursor.execute(
-        """ CREATE DATABASE IF NOT EXISTS buku;
+    cursor = conn.cursor()
+    sql = """ 
+            DROP DATABASE IF EXISTS buku;
+            CREATE DATABASE IF NOT EXISTS buku;
             USE buku;
 
             CREATE TABLE users (
@@ -16,12 +16,10 @@ def createDatabase():
                 alamat VARCHAR(300),
                 PRIMARY KEY (id_user)
             );
-
             INSERT INTO users VALUES
-            (1, "adi", '2000-01-02', "Mahasiswa", "Jl. Pegangsaan Timur No.56"),
-            (2, "budi", '2000-02-03', "PNS", "Jl. Soekarno Hatta No.37"),
-            (3, "chaniago", '2000-03-04', "Swasta", "Jl. Alwi Abdul Djalil Habibie");
-
+                (1, "adi", '2000-01-02', "Mahasiswa", "Jl. Pegangsaan Timur No.56"),
+                (2, "budi", '2000-02-03', "PNS", "Jl. Soekarno Hatta No.37"),
+                (3, "chaniago", '2000-03-04', "Swasta", "Jl. Alwi Abdul Djalil Habibie");
             CREATE TABLE books (
                 id_buku INT AUTO_INCREMENT,
                 nama_buku VARCHAR(50),
@@ -29,13 +27,10 @@ def createDatabase():
                 stock INT,
                 PRIMARY KEY (id_buku)
             );
-
             INSERT INTO books VALUES
-            (1, "Kitab Pink Jason Ranti", "Biografi", 10),
-            (2, "Cantik Itu Luka", "Novel", 10),
-            (3, "Hello, Cello", "Fiksi", 10);
-
-
+                (1, "Kitab Pink Jason Ranti", "Biografi", 10),
+                (2, "Cantik Itu Luka", "Novel", 10),
+                (3, "Hello, Cello", "Fiksi", 10);
             CREATE TABLE peminjaman (
                 id_user INT,
                 id_buku INT,
@@ -44,19 +39,23 @@ def createDatabase():
                 tgl_pinjam DATE,
                 tgl_pengembalian DATE
             );
-            
-            INSERT INTO peminjaman VALUES
-            (1, 1, "adi", "Kitab Pink Jason Ranti", '2022-07-20', '2022-07-23'),
-            (2, 2, "budi", "Cantik Itu Lukai", '2022-07-21', '2022-07-24'),
-            (3, 3, "chaniago", "Hello, Cello", '2022-07-22', '2022-07-25');"""
-    )
+            INSERT INTO
+                peminjaman(id_user, id_buku, nama_user, nama_buku, tgl_pinjam, tgl_pengembalian)
+            VALUES
+                (1, 1, "adi", "Kitab Pink Jason Ranti", '2022-07-20', '2022-07-23'),
+                (2, 2, "budi", "Cantik Itu Lukai", '2022-07-21', '2022-07-24'),
+                (3, 3, "chaniago", "Hello, Cello", '2022-07-22', '2022-07-25');
+        """
+    cursor.execute(sql)
+    cursor.close()
+    conn.close()
 
 
-def myDB():
+def Conn():
     return mysql.connector.connect(
         host="localhost",
         user="root",
-        password=input("Input sql root pass: "),
+        password="TxnqyeY4njLuQ5ZB*",
         database="buku",
     )
 
@@ -69,17 +68,19 @@ def daftarUserBaru():
             datetime.datetime.strptime(tgl_lahir, "%Y-%m-%d")
             break
         except:
-            raise ValueError("Incorrect data format, should be YYYY-MM-DD")
+            print("Incorrect data format, should be YYYY-MM-DD")
     pekerjaan = str(input("Pekerjaan: "))
     alamat = str(input("Masukan alamat: "))
 
-    mydb = myDB()
-    mycursor = mydb.cursor()
-    mycursor.execute(
+    conn = Conn()
+    cursor = conn.cursor()
+    cursor.execute(
         f'INSERT INTO users VALUES (NULL, "{nama_user}", \'{tgl_lahir}\', "{pekerjaan}", "{alamat}")'
     )
-    mydb.commit()
-    print(f"Query berhasil ! {mycursor.rowcount} record inserted.")
+    conn.commit()
+    print(f"Query berhasil ! {cursor.rowcount} record inserted.")
+    cursor.close()
+    conn.close()
 
 
 def daftarBukuBaru():
@@ -92,13 +93,15 @@ def daftarBukuBaru():
         except:
             print("\n!!!Input salah! Tolong masukan satuan angka!!!\n")
 
-    mydb = myDB()
-    mycursor = mydb.cursor()
-    mycursor.execute(
+    conn = Conn()
+    cursor = conn.cursor()
+    cursor.execute(
         f'INSERT INTO books VALUES (NULL, "{nama_buku}", "{kategori}", {stock})'
     )
-    mydb.commit()
-    print(f"Query berhasil ! {mycursor.rowcount} record inserted.")
+    conn.commit()
+    print(f"Query berhasil ! {cursor.rowcount} record inserted.")
+    cursor.close()
+    conn.close()
 
 
 def peminjaman():
@@ -117,25 +120,29 @@ def peminjaman():
     nama_user = str(input("Masukan nama peminjam: "))
     nama_buku = str(input("Masukan nama buku: "))
 
-    mydb = myDB()
-    mycursor = mydb.cursor()
-    mycursor.execute(
+    conn = Conn()
+    cursor = conn.cursor()
+    cursor.execute(
         f'INSERT INTO peminjaman VALUES ({id_user}, {id_buku}, "{nama_user}", "{nama_buku}", CURDATE(), DATE_ADD(CURDATE(), INTERVAL 3 DAY))'
     )
-    mydb.commit()
-    print(f"Query berhasil ! {mycursor.rowcount} record inserted.")
+    conn.commit()
+    print(f"Query berhasil ! {cursor.rowcount} record inserted.")
 
-    mydb = myDB()
-    mycursor = mydb.cursor()
-    mycursor.execute(f"UPDATE books SET stock=stock-1 WHERE id_buku={id_buku};")
-    mydb.commit()
+    conn = Conn()
+    cursor = conn.cursor()
+    cursor.execute(f"UPDATE books SET stock=stock-1 WHERE id_buku={id_buku};")
+    conn.commit()
+    cursor.close()
+    conn.close()
 
 
 def tampilkanDaftarBuku():
-    mydb = myDB()
-    mycursor = mydb.cursor()
-    mycursor.execute("SELECT * FROM books")
-    myresult = mycursor.fetchall()
+    conn = Conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM books")
+    myresult = cursor.fetchall()
+    cursor.close()
+    conn.close()
     print(
         tabulate(
             [x for x in myresult], headers=["id", "Judul Buku", "Kategori", "Stock"]
@@ -144,10 +151,12 @@ def tampilkanDaftarBuku():
 
 
 def tampilkanDaftarUser():
-    mydb = myDB()
-    mycursor = mydb.cursor()
-    mycursor.execute("SELECT * FROM users")
-    myresult = mycursor.fetchall()
+    conn = Conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users")
+    myresult = cursor.fetchall()
+    cursor.close()
+    conn.close()
     print(
         tabulate(
             [x for x in myresult],
@@ -157,10 +166,12 @@ def tampilkanDaftarUser():
 
 
 def tampilkanDaftarPeminjaman():
-    mydb = myDB()
-    mycursor = mydb.cursor()
-    mycursor.execute("SELECT * FROM peminjaman")
-    myresult = mycursor.fetchall()
+    conn = Conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM peminjaman")
+    myresult = cursor.fetchall()
+    cursor.close()
+    conn.close()
     print(
         tabulate(
             [x for x in myresult],
@@ -178,10 +189,12 @@ def tampilkanDaftarPeminjaman():
 
 def cariBuku():
     arg = str(input("Masukan nama buku: "))
-    mydb = myDB()
-    mycursor = mydb.cursor()
-    mycursor.execute(f'SELECT * FROM books WHERE nama_buku LIKE "%{arg}%";')
-    myresult = mycursor.fetchall()
+    conn = Conn()
+    cursor = conn.cursor()
+    cursor.execute(f'SELECT * FROM books WHERE nama_buku LIKE "%{arg}%";')
+    myresult = cursor.fetchall()
+    cursor.close()
+    conn.close()
     print(
         tabulate(
             [x for x in myresult], headers=["id", "Judul Buku", "Kategori", "Stock"]
@@ -203,18 +216,20 @@ def pengembalian():
         except:
             print("\n!!!Input salah! Tolong masukan satuan angka!!!\n")
 
-    mydb = myDB()
-    mycursor = mydb.cursor()
-    mycursor.execute(
+    conn = Conn()
+    cursor = conn.cursor()
+    cursor.execute(
         f"DELETE FROM peminjaman WHERE id_user={id_user} AND id_buku={id_buku}"
     )
-    mydb.commit()
-    print(mycursor.rowcount, "record deleted.")
+    conn.commit()
+    print(cursor.rowcount, "record deleted.")
 
-    mydb = myDB()
-    mycursor = mydb.cursor()
-    mycursor.execute(f"UPDATE books SET stock=stock+1 WHERE id_buku={id_buku};")
-    mydb.commit()
+    conn = Conn()
+    cursor = conn.cursor()
+    cursor.execute(f"UPDATE books SET stock=stock+1 WHERE id_buku={id_buku};")
+    conn.commit()
+    cursor.close()
+    conn.close()
 
 
 def actions():
