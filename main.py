@@ -2,13 +2,12 @@ def createDatabase():
     mydb = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="TxnqyeY4njLuQ5ZB*"
+    password=input("Input sql root pass: ")
     )
 
     mycursor = mydb.cursor()
 
-    mycursor.execute(  """  DROP DATABASE IF EXISTS buku;
-                            CREATE DATABASE IF NOT EXISTS buku;
+    mycursor.execute(  """  CREATE DATABASE IF NOT EXISTS buku;
                             USE buku;
 
                             CREATE TABLE users (
@@ -46,32 +45,42 @@ def createDatabase():
                                 nama_buku VARCHAR(50),
                                 tgl_pinjam DATE,
                                 tgl_pengembalian DATE
-                            );""")
+                            );
+                            
+                            INSERT INTO peminjaman VALUES
+                            (1, 1, "adi", "Kitab Pink Jason Ranti", '2022-07-20', '2022-07-23'),
+                            (2, 2, "budi", "Cantik Itu Lukai", '2022-07-21', '2022-07-24'),
+                            (3, 3, "chaniago", "Hello, Cello", '2022-07-22', '2022-07-25');""")
 
 
 def myDB():
     return mysql.connector.connect( host="localhost",
                                     user="root",
-                                    password="TxnqyeY4njLuQ5ZB*",
+                                    password=input("Input sql root pass: "),
                                     database="buku")
 
 def daftarUserBaru():
-    username    = str(input("Masukan nama user: "))
-    birthdate   = str(input("Masukan tanggal lahir(YYYY-MM-DD): "))
+    nama_user   = str(input("Masukan nama user: "))
+    while True:
+        try:
+            tgl_lahir   = str(input("Masukan tanggal lahir(YYYY-MM-DD): "))
+            datetime.datetime.strptime(tgl_lahir, '%Y-%m-%d')
+            break
+        except:
+            raise ValueError("Incorrect data format, should be YYYY-MM-DD")
     pekerjaan   = str(input("Pekerjaan: "))
     alamat      = str(input("Masukan alamat: "))
 
     mydb = myDB()
     mycursor = mydb.cursor()
-    mycursor.execute(f"INSERT INTO users VALUES (NULL, \"{username}\", '{birthdate}', \"{pekerjaan}\", \"{alamat}\")")
-
+    mycursor.execute(f"INSERT INTO users VALUES (NULL, \"{nama_user}\", '{tgl_lahir}', \"{pekerjaan}\", \"{alamat}\")")
     mydb.commit()
-    print(mycursor.rowcount, "record inserted.")
+    print(f"Query berhasil ! {mycursor.rowcount} record inserted.")
     
 
 def daftarBukuBaru():
-    title    = str(input("Enter book name: "))
-    kategori = str(input("Masukan kategori: "))
+    nama_buku   = str(input("Enter book name: "))
+    kategori    = str(input("Masukan kategori: "))
     while True:
             try:
                 stock   = int(input("Stok buku: "))
@@ -81,38 +90,35 @@ def daftarBukuBaru():
 
     mydb = myDB()
     mycursor = mydb.cursor()
-    mycursor.execute(f"INSERT INTO books VALUES (NULL, \"{title}\", \"{kategori}\", {stock})")
-
+    mycursor.execute(f"INSERT INTO books VALUES (NULL, \"{nama_buku}\", \"{kategori}\", {stock})")
     mydb.commit()
-    print(mycursor.rowcount, "record inserted.")
+    print(f"Query berhasil ! {mycursor.rowcount} record inserted.")
 
 def peminjaman():
     while True:
             try:
-                user_id     = int(input("Masukan id peminjam: "))
+                id_user = int(input("Masukan id peminjam: "))
                 break
             except:
                 print("\n!!!Input salah! Tolong masukan satuan angka!!!\n")
     while True:
             try:
-                book_id     = int(input("Masukan id buku: "))
+                id_buku = int(input("Masukan id buku: "))
                 break
             except:
                 print("\n!!!Input salah! Tolong masukan satuan angka!!!\n")
-    username    = str(input("Masukan nama peminjam: "))
-    title       = str(input("Masukan nama buku: "))
+    nama_user = str(input("Masukan nama peminjam: "))
+    nama_buku = str(input("Masukan nama buku: "))
 
     mydb = myDB()
     mycursor = mydb.cursor()
-    mycursor.execute(f"INSERT INTO peminjaman VALUES ({user_id}, {book_id}, \"{username}\", \"{title}\", CURDATE(), DATE_ADD(CURDATE(), INTERVAL 3 DAY))")
-
+    mycursor.execute(f"INSERT INTO peminjaman VALUES ({id_user}, {id_buku}, \"{nama_user}\", \"{nama_buku}\", CURDATE(), DATE_ADD(CURDATE(), INTERVAL 3 DAY))")
     mydb.commit()
-    print(mycursor.rowcount, "record inserted.")
+    print(f"Query berhasil ! {mycursor.rowcount} record inserted.")
 
     mydb = myDB()
     mycursor = mydb.cursor()
-    mycursor.execute(f"UPDATE books SET stock=stock-1 WHERE id_buku={book_id};")
-
+    mycursor.execute(f"UPDATE books SET stock=stock-1 WHERE id_buku={id_buku};")
     mydb.commit()
 
 
@@ -128,14 +134,14 @@ def tampilkanDaftarUser():
     mycursor = mydb.cursor()
     mycursor.execute("SELECT * FROM users")
     myresult = mycursor.fetchall()
-    print(tabulate([x for x in myresult], headers=['id', 'Username','tanggal_lahir', 'Pekerjaan', 'Alamat']))
+    print(tabulate([x for x in myresult], headers=['id', 'Username','Tanggal Lahir', 'Pekerjaan', 'Alamat']))
     
 def tampilkanDaftarPeminjaman():
     mydb = myDB()
     mycursor = mydb.cursor()
     mycursor.execute("SELECT * FROM peminjaman")
     myresult = mycursor.fetchall()
-    print(tabulate([x for x in myresult], headers=['User ID', 'Book ID', 'Username','Judul Buku', 'Tanggal Pinjam']))
+    print(tabulate([x for x in myresult], headers=['User ID', 'Book ID', 'Username','Judul Buku', 'Tanggal Pinjam', "Tanggal Pengembalian"]))
 
 def cariBuku():
     arg = str(input("Masukan nama buku: "))
@@ -148,30 +154,26 @@ def cariBuku():
 def pengembalian():
     while True:
             try:
-                user_id     = int(input("Masukan id peminjam: "))
+                id_user = int(input("Masukan id peminjam: "))
                 break
             except:
                 print("\n!!!Input salah! Tolong masukan satuan angka!!!\n")
     while True:
             try:
-                book_id     = int(input("Masukan id buku: "))
+                id_buku = int(input("Masukan id buku: "))
                 break
             except:
                 print("\n!!!Input salah! Tolong masukan satuan angka!!!\n")
-    username    = str(input("Masukan nama peminjam: "))
-    title       = str(input("Masukan nama buku: "))
 
     mydb = myDB()
     mycursor = mydb.cursor()
-    mycursor.execute(f"INSERT INTO peminjaman VALUES ({user_id}, {book_id}, \"{username}\", \"{title}\", CURDATE(), DATE_ADD(CURDATE(), INTERVAL 3 DAY))")
-
+    mycursor.execute(f"DELETE FROM peminjaman WHERE id_user={id_user} AND id_buku={id_buku}")
     mydb.commit()
-    print(mycursor.rowcount, "record inserted.")
+    print(mycursor.rowcount, "record deleted.")
 
     mydb = myDB()
     mycursor = mydb.cursor()
-    mycursor.execute(f"UPDATE books SET stock=stock-1 WHERE id_buku={book_id};")
-
+    mycursor.execute(f"UPDATE books SET stock=stock+1 WHERE id_buku={id_buku};")
     mydb.commit()
 
 def actions():
@@ -217,11 +219,8 @@ def actions():
         else:
             print("\n!!!Input salah! Tolong masukan satuan angka dari 1-9!!!\n")
 
-
-
 if __name__ == "__main__":
-    import os
-    import mysql.connector
+    import os, datetime, mysql.connector
     from tabulate import tabulate
 
     createDatabase()
