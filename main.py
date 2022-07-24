@@ -34,9 +34,9 @@ def createDatabase():
                             );
 
                             INSERT INTO books VALUES
-                            (1, "Kitab Pink Jason Ranti", "Biografi", 9),
-                            (2, "Cantik Itu Luka", "Novel", 9),
-                            (3, "Hello, Cello", "Fiksi", 9);
+                            (1, "Kitab Pink Jason Ranti", "Biografi", 10),
+                            (2, "Cantik Itu Luka", "Novel", 10),
+                            (3, "Hello, Cello", "Fiksi", 10);
 
 
                             CREATE TABLE peminjaman (
@@ -44,13 +44,9 @@ def createDatabase():
                                 id_buku INT,
                                 nama_user VARCHAR(50),
                                 nama_buku VARCHAR(50),
-                                tgl_pinjam DATE
-                            );
-
-                            INSERT INTO peminjaman VALUES
-                            (1, 1, "adi", "Kitab Pink Jason Ranti", '2022-07-20'),
-                            (2, 2, "budi", "Cantik Itu Lukai", '2022-07-21'),
-                            (3, 3, "chaniago", "Hello, Cello", '2022-07-22');""")
+                                tgl_pinjam DATE,
+                                tgl_pengembalian DATE
+                            );""")
 
 
 def myDB():
@@ -75,7 +71,7 @@ def daftarUserBaru():
 
 def daftarBukuBaru():
     title    = str(input("Enter book name: "))
-    kategori   = str(input("Masukan kategori: "))
+    kategori = str(input("Masukan kategori: "))
     while True:
             try:
                 stock   = int(input("Stok buku: "))
@@ -91,7 +87,34 @@ def daftarBukuBaru():
     print(mycursor.rowcount, "record inserted.")
 
 def peminjaman():
-    print("World")
+    while True:
+            try:
+                user_id     = int(input("Masukan id peminjam: "))
+                break
+            except:
+                print("\n!!!Input salah! Tolong masukan satuan angka!!!\n")
+    while True:
+            try:
+                book_id     = int(input("Masukan id buku: "))
+                break
+            except:
+                print("\n!!!Input salah! Tolong masukan satuan angka!!!\n")
+    username    = str(input("Masukan nama peminjam: "))
+    title       = str(input("Masukan nama buku: "))
+
+    mydb = myDB()
+    mycursor = mydb.cursor()
+    mycursor.execute(f"INSERT INTO peminjaman VALUES ({user_id}, {book_id}, \"{username}\", \"{title}\", CURDATE(), DATE_ADD(CURDATE(), INTERVAL 3 DAY))")
+
+    mydb.commit()
+    print(mycursor.rowcount, "record inserted.")
+
+    mydb = myDB()
+    mycursor = mydb.cursor()
+    mycursor.execute(f"UPDATE books SET stock=stock-1 WHERE id_buku={book_id};")
+
+    mydb.commit()
+
 
 def tampilkanDaftarBuku():
     mydb = myDB()
@@ -115,10 +138,41 @@ def tampilkanDaftarPeminjaman():
     print(tabulate([x for x in myresult], headers=['User ID', 'Book ID', 'Username','Judul Buku', 'Tanggal Pinjam']))
 
 def cariBuku():
-    print("World")
+    arg = str(input("Masukan nama buku: "))
+    mydb = myDB()
+    mycursor = mydb.cursor()
+    mycursor.execute(f"SELECT * FROM books WHERE nama_buku LIKE \"%{arg}%\";")
+    myresult = mycursor.fetchall()
+    print(tabulate([x for x in myresult], headers=['id', 'Judul Buku', 'Kategori', 'Stock']))
 
 def pengembalian():
-    print("World")
+    while True:
+            try:
+                user_id     = int(input("Masukan id peminjam: "))
+                break
+            except:
+                print("\n!!!Input salah! Tolong masukan satuan angka!!!\n")
+    while True:
+            try:
+                book_id     = int(input("Masukan id buku: "))
+                break
+            except:
+                print("\n!!!Input salah! Tolong masukan satuan angka!!!\n")
+    username    = str(input("Masukan nama peminjam: "))
+    title       = str(input("Masukan nama buku: "))
+
+    mydb = myDB()
+    mycursor = mydb.cursor()
+    mycursor.execute(f"INSERT INTO peminjaman VALUES ({user_id}, {book_id}, \"{username}\", \"{title}\", CURDATE(), DATE_ADD(CURDATE(), INTERVAL 3 DAY))")
+
+    mydb.commit()
+    print(mycursor.rowcount, "record inserted.")
+
+    mydb = myDB()
+    mycursor = mydb.cursor()
+    mycursor.execute(f"UPDATE books SET stock=stock-1 WHERE id_buku={book_id};")
+
+    mydb.commit()
 
 def actions():
     while True:
