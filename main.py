@@ -1,7 +1,5 @@
-def createDatabase():
-    conn = mysql.connector.connect(
-        host="localhost", user="root", password="TxnqyeY4njLuQ5ZB*"
-    )
+def createDatabase(SQLpass):
+    conn = mysql.connector.connect(host="localhost", user="root", password=SQLpass)
     cursor = conn.cursor()
     sql = """ 
             DROP DATABASE IF EXISTS buku;
@@ -39,28 +37,22 @@ def createDatabase():
                 tgl_pinjam DATE,
                 tgl_pengembalian DATE
             );
-            INSERT INTO
-                peminjaman(id_user, id_buku, nama_user, nama_buku, tgl_pinjam, tgl_pengembalian)
-            VALUES
-                (1, 1, "adi", "Kitab Pink Jason Ranti", '2022-07-20', '2022-07-23'),
-                (2, 2, "budi", "Cantik Itu Lukai", '2022-07-21', '2022-07-24'),
-                (3, 3, "chaniago", "Hello, Cello", '2022-07-22', '2022-07-25');
         """
     cursor.execute(sql)
     cursor.close()
     conn.close()
 
 
-def Conn():
+def Conn(SQLpass):
     return mysql.connector.connect(
         host="localhost",
         user="root",
-        password="TxnqyeY4njLuQ5ZB*",
+        password=SQLpass,
         database="buku",
     )
 
 
-def daftarUserBaru():
+def daftarUserBaru(SQLpass):
     nama_user = str(input("Masukan nama user: "))
     while True:
         try:
@@ -72,7 +64,7 @@ def daftarUserBaru():
     pekerjaan = str(input("Pekerjaan: "))
     alamat = str(input("Masukan alamat: "))
 
-    conn = Conn()
+    conn = Conn(SQLpass)
     cursor = conn.cursor()
     cursor.execute(
         f'INSERT INTO users VALUES (NULL, "{nama_user}", \'{tgl_lahir}\', "{pekerjaan}", "{alamat}")'
@@ -83,7 +75,7 @@ def daftarUserBaru():
     conn.close()
 
 
-def daftarBukuBaru():
+def daftarBukuBaru(SQLpass):
     nama_buku = str(input("Enter book name: "))
     kategori = str(input("Masukan kategori: "))
     while True:
@@ -93,7 +85,7 @@ def daftarBukuBaru():
         except:
             print("\n!!!Input salah! Tolong masukan satuan angka!!!\n")
 
-    conn = Conn()
+    conn = Conn(SQLpass)
     cursor = conn.cursor()
     cursor.execute(
         f'INSERT INTO books VALUES (NULL, "{nama_buku}", "{kategori}", {stock})'
@@ -104,7 +96,7 @@ def daftarBukuBaru():
     conn.close()
 
 
-def peminjaman():
+def peminjaman(SQLpass):
     while True:
         try:
             id_user = int(input("Masukan id peminjam: "))
@@ -120,7 +112,7 @@ def peminjaman():
     nama_user = str(input("Masukan nama peminjam: "))
     nama_buku = str(input("Masukan nama buku: "))
 
-    conn = Conn()
+    conn = Conn(SQLpass)
     cursor = conn.cursor()
     cursor.execute(
         f'INSERT INTO peminjaman VALUES ({id_user}, {id_buku}, "{nama_user}", "{nama_buku}", CURDATE(), DATE_ADD(CURDATE(), INTERVAL 3 DAY))'
@@ -128,7 +120,7 @@ def peminjaman():
     conn.commit()
     print(f"Query berhasil ! {cursor.rowcount} record inserted.")
 
-    conn = Conn()
+    conn = Conn(SQLpass)
     cursor = conn.cursor()
     cursor.execute(f"UPDATE books SET stock=stock-1 WHERE id_buku={id_buku};")
     conn.commit()
@@ -136,8 +128,8 @@ def peminjaman():
     conn.close()
 
 
-def tampilkanDaftarBuku():
-    conn = Conn()
+def tampilkanDaftarBuku(SQLpass):
+    conn = Conn(SQLpass)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM books")
     myresult = cursor.fetchall()
@@ -150,8 +142,8 @@ def tampilkanDaftarBuku():
     )
 
 
-def tampilkanDaftarUser():
-    conn = Conn()
+def tampilkanDaftarUser(SQLpass):
+    conn = Conn(SQLpass)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM users")
     myresult = cursor.fetchall()
@@ -165,8 +157,8 @@ def tampilkanDaftarUser():
     )
 
 
-def tampilkanDaftarPeminjaman():
-    conn = Conn()
+def tampilkanDaftarPeminjaman(SQLpass):
+    conn = Conn(SQLpass)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM peminjaman")
     myresult = cursor.fetchall()
@@ -187,9 +179,9 @@ def tampilkanDaftarPeminjaman():
     )
 
 
-def cariBuku():
+def cariBuku(SQLpass):
     arg = str(input("Masukan nama buku: "))
-    conn = Conn()
+    conn = Conn(SQLpass)
     cursor = conn.cursor()
     cursor.execute(f'SELECT * FROM books WHERE nama_buku LIKE "%{arg}%";')
     myresult = cursor.fetchall()
@@ -202,7 +194,7 @@ def cariBuku():
     )
 
 
-def pengembalian():
+def pengembalian(SQLpass):
     while True:
         try:
             id_user = int(input("Masukan id peminjam: "))
@@ -216,7 +208,7 @@ def pengembalian():
         except:
             print("\n!!!Input salah! Tolong masukan satuan angka!!!\n")
 
-    conn = Conn()
+    conn = Conn(SQLpass)
     cursor = conn.cursor()
     cursor.execute(
         f"DELETE FROM peminjaman WHERE id_user={id_user} AND id_buku={id_buku}"
@@ -224,7 +216,7 @@ def pengembalian():
     conn.commit()
     print(cursor.rowcount, "record deleted.")
 
-    conn = Conn()
+    conn = Conn(SQLpass)
     cursor = conn.cursor()
     cursor.execute(f"UPDATE books SET stock=stock+1 WHERE id_buku={id_buku};")
     conn.commit()
@@ -232,7 +224,7 @@ def pengembalian():
     conn.close()
 
 
-def actions():
+def actions(SQLpass):
     while True:
         print(
             """
@@ -257,21 +249,21 @@ def actions():
 
         print("")
         if argument == 1:
-            daftarUserBaru()
+            daftarUserBaru(SQLpass)
         elif argument == 2:
-            daftarBukuBaru()
+            daftarBukuBaru(SQLpass)
         elif argument == 3:
-            peminjaman()
+            peminjaman(SQLpass)
         elif argument == 4:
-            tampilkanDaftarBuku()
+            tampilkanDaftarBuku(SQLpass)
         elif argument == 5:
-            tampilkanDaftarUser()
+            tampilkanDaftarUser(SQLpass)
         elif argument == 6:
-            tampilkanDaftarPeminjaman()
+            tampilkanDaftarPeminjaman(SQLpass)
         elif argument == 7:
-            cariBuku()
+            cariBuku(SQLpass)
         elif argument == 8:
-            pengembalian()
+            pengembalian(SQLpass)
         elif argument == 9:
             exit()
         else:
@@ -282,5 +274,6 @@ if __name__ == "__main__":
     import os, datetime, mysql.connector
     from tabulate import tabulate
 
-    createDatabase()
-    actions()
+    SQLpass = input("Please input your sql password: ")
+    createDatabase(SQLpass)
+    actions(SQLpass)
