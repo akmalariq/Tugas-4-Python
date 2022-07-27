@@ -97,23 +97,28 @@ def daftarBukuBaru(SQLpass):
 
 
 def peminjaman(SQLpass):
+    conn = Conn(SQLpass)
+    cursor = conn.cursor()
+
     while True:
         try:
             id_user = int(input("Masukan id peminjam: "))
             break
         except:
             print("\n!!!Input salah! Tolong masukan satuan angka!!!\n")
+    cursor.execute(f"SELECT * FROM users WHERE id_user={id_user};")
+    nama_user = cursor.fetchone()[1]
     while True:
         try:
             id_buku = int(input("Masukan id buku: "))
             break
         except:
             print("\n!!!Input salah! Tolong masukan satuan angka!!!\n")
-    nama_user = str(input("Masukan nama peminjam: "))
-    nama_buku = str(input("Masukan nama buku: "))
+    cursor.execute(f"SELECT * FROM books WHERE id_buku={id_buku};")
+    nama_buku = cursor.fetchone()[1]
+    # nama_user = str(input("Masukan nama peminjam: "))
+    # nama_buku = str(input("Masukan nama buku: "))
 
-    conn = Conn(SQLpass)
-    cursor = conn.cursor()
     cursor.execute(
         f'INSERT INTO peminjaman VALUES ({id_user}, {id_buku}, "{nama_user}", "{nama_buku}", CURDATE(), DATE_ADD(CURDATE(), INTERVAL 3 DAY))'
     )
@@ -192,6 +197,21 @@ def cariBuku(SQLpass):
             [x for x in myresult], headers=["id", "Judul Buku", "Kategori", "Stock"]
         )
     )
+
+
+# def cariUser(SQLpass):
+#     arg = str(input("Masukan nama anda: "))
+#     conn = Conn(SQLpass)
+#     cursor = conn.cursor()
+#     cursor.execute(f'SELECT * FROM users WHERE nama_user LIKE "%{arg}%";')
+#     myresult = cursor.fetchall()
+#     cursor.close()
+#     conn.close()
+#     print(
+#         tabulate(
+#             [x for x in myresult], headers=["id", "Username", "Tanggal Lahir", "Pekerjaan", "Alamat"]
+#         )
+#     )
 
 
 def pengembalian(SQLpass):
