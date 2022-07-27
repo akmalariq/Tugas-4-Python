@@ -1,4 +1,8 @@
 def createDatabase(SQLpass):
+    """
+    Produce new database "buku"
+    """
+
     conn = mysql.connector.connect(host="localhost", user="root", password=SQLpass)
     cursor = conn.cursor()
     sql = """ 
@@ -44,6 +48,12 @@ def createDatabase(SQLpass):
 
 
 def Conn(SQLpass):
+    """
+    Establish a new mysql connection
+
+    Returns object conn
+    """
+
     return mysql.connector.connect(
         host="localhost",
         user="root",
@@ -53,6 +63,10 @@ def Conn(SQLpass):
 
 
 def daftarUserBaru(SQLpass):
+    """
+    Add a new user in the database
+    """
+
     nama_user = str(input("Masukan nama user: "))
     while True:
         try:
@@ -67,7 +81,7 @@ def daftarUserBaru(SQLpass):
     conn = Conn(SQLpass)
     cursor = conn.cursor()
     cursor.execute(
-        f'INSERT INTO users VALUES (NULL, "{nama_user}", \'{tgl_lahir}\', "{pekerjaan}", "{alamat}")'
+        f'INSERT INTO users VALUES (NULL, "{nama_user}", \'{tgl_lahir}\', "{pekerjaan}", "{alamat}");'
     )
     conn.commit()
     print(f"Query berhasil ! {cursor.rowcount} record inserted.")
@@ -76,6 +90,10 @@ def daftarUserBaru(SQLpass):
 
 
 def daftarBukuBaru(SQLpass):
+    """
+    Add a new book in the database
+    """
+
     nama_buku = str(input("Enter book name: "))
     kategori = str(input("Masukan kategori: "))
     while True:
@@ -88,7 +106,7 @@ def daftarBukuBaru(SQLpass):
     conn = Conn(SQLpass)
     cursor = conn.cursor()
     cursor.execute(
-        f'INSERT INTO books VALUES (NULL, "{nama_buku}", "{kategori}", {stock})'
+        f'INSERT INTO books VALUES (NULL, "{nama_buku}", "{kategori}", {stock});'
     )
     conn.commit()
     print(f"Query berhasil ! {cursor.rowcount} record inserted.")
@@ -97,6 +115,10 @@ def daftarBukuBaru(SQLpass):
 
 
 def peminjaman(SQLpass):
+    """
+    Add a new input record for peminjaman by UserID and BookID, also decrement book stock by 1
+    """
+
     conn = Conn(SQLpass)
     cursor = conn.cursor()
 
@@ -120,7 +142,18 @@ def peminjaman(SQLpass):
     # nama_buku = str(input("Masukan nama buku: "))
 
     cursor.execute(
-        f'INSERT INTO peminjaman VALUES ({id_user}, {id_buku}, "{nama_user}", "{nama_buku}", CURDATE(), DATE_ADD(CURDATE(), INTERVAL 3 DAY))'
+        f"""INSERT INTO
+                peminjaman
+            VALUES
+            (   {id_user},
+                {id_buku},
+                "{nama_user}",
+                "{nama_buku}",
+                CURDATE(),
+                DATE_ADD(CURDATE(),
+                INTERVAL 3 DAY)
+            );
+        """
     )
     conn.commit()
     print(f"Query berhasil ! {cursor.rowcount} record inserted.")
@@ -134,6 +167,10 @@ def peminjaman(SQLpass):
 
 
 def tampilkanDaftarBuku(SQLpass):
+    """
+    Show all books in the database
+    """
+
     conn = Conn(SQLpass)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM books")
@@ -148,6 +185,10 @@ def tampilkanDaftarBuku(SQLpass):
 
 
 def tampilkanDaftarUser(SQLpass):
+    """
+    Show all users in the databse
+    """
+
     conn = Conn(SQLpass)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM users")
@@ -163,6 +204,10 @@ def tampilkanDaftarUser(SQLpass):
 
 
 def tampilkanDaftarPeminjaman(SQLpass):
+    """
+    Show all records book borrowers
+    """
+
     conn = Conn(SQLpass)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM peminjaman")
@@ -185,6 +230,10 @@ def tampilkanDaftarPeminjaman(SQLpass):
 
 
 def cariBuku(SQLpass):
+    """
+    Show books that has similar title to whats given in the input by users
+    """
+
     arg = str(input("Masukan nama buku: "))
     conn = Conn(SQLpass)
     cursor = conn.cursor()
@@ -199,22 +248,11 @@ def cariBuku(SQLpass):
     )
 
 
-# def cariUser(SQLpass):
-#     arg = str(input("Masukan nama anda: "))
-#     conn = Conn(SQLpass)
-#     cursor = conn.cursor()
-#     cursor.execute(f'SELECT * FROM users WHERE nama_user LIKE "%{arg}%";')
-#     myresult = cursor.fetchall()
-#     cursor.close()
-#     conn.close()
-#     print(
-#         tabulate(
-#             [x for x in myresult], headers=["id", "Username", "Tanggal Lahir", "Pekerjaan", "Alamat"]
-#         )
-#     )
-
-
 def pengembalian(SQLpass):
+    """
+    Delete borrowing records by UserID and BookID
+    """
+
     while True:
         try:
             id_user = int(input("Masukan id peminjam: "))
@@ -245,6 +283,10 @@ def pengembalian(SQLpass):
 
 
 def actions(SQLpass):
+    """
+    Show list of actions and asked input for user's action
+    """
+
     while True:
         print(
             """
